@@ -5,7 +5,6 @@ import SimpleITK as sitk
 from .resunet import UNet
 import warnings
 import sys
-from tqdm import tqdm
 import skimage
 import logging
 
@@ -23,7 +22,6 @@ model_urls = {('unet', 'R231'): ('https://github.com/JoHof/lungmask/releases/dow
 def apply(image, model=None, force_cpu=False, batch_size=20, volume_postprocessing=True, noHU=False):
     if model is None:
         model = get_model('unet', 'R231')
-    
     numpy_mode = isinstance(image, np.ndarray)
     if numpy_mode:
         inimg_raw = image.copy()
@@ -40,7 +38,7 @@ def apply(image, model=None, force_cpu=False, batch_size=20, volume_postprocessi
         if torch.cuda.is_available():
             device = torch.device('cuda')
         else:
-            logging.info("No GPU support available, will use CPU. Note, that this is significantly slower!")
+            #logging.info("No GPU support available, will use CPU. Note, that this is significantly slower!")
             batch_size = 1
             device = torch.device('cpu')
     model.to(device)
@@ -64,7 +62,7 @@ def apply(image, model=None, force_cpu=False, batch_size=20, volume_postprocessi
     timage_res = np.empty((np.append(0, tvolslices[0].shape)), dtype=np.uint8)
 
     with torch.no_grad():
-        for X in tqdm(dataloader_val):
+        for X in dataloader_val:
             X = X.float().to(device)
             prediction = model(X)
             pls = torch.max(prediction, 1)[1].detach().cpu().numpy().astype(np.uint8)

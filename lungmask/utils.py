@@ -7,7 +7,6 @@ import sys
 import SimpleITK as sitk
 import pydicom as pyd
 import logging
-from tqdm import tqdm
 import fill_voids
 import skimage.morphology
 
@@ -110,7 +109,7 @@ def read_dicoms(path, primary=True, original=True):
     dcm_parameters = []
     unique_set = []  # need this because too often there are duplicates of dicom files with different names
     i = 0
-    for fname in tqdm(allfnames):
+    for fname in allfnames:
         filename_ = os.path.splitext(os.path.split(fname)[1])
         i += 1
         if filename_[0] != 'DICOMDIR':
@@ -212,7 +211,7 @@ def postrocessing(label_image, spare=[]):
             origlabels_maxsub[r_max_intensity] = r.area
             region_to_lobemap[r.label] = r_max_intensity
 
-    for r in tqdm(regions):
+    for r in regions:
         r_max_intensity = int(r.max_intensity)
         if (r.area < origlabels_maxsub[r_max_intensity] or r_max_intensity in spare) and r.area>2: # area>2 improves runtime because small areas 1 and 2 voxel will be ignored
             bb = bbox_3D(regionmask == r.label)
